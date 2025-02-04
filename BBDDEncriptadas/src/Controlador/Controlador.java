@@ -3,6 +3,7 @@ package Controlador;
 import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 import javax.crypto.SecretKey;
@@ -29,6 +30,10 @@ public class Controlador {
     private byte[] mensajeCifradoAES;
     private int index;
 
+    // Hash
+    private ArrayList<String> hashes;
+    private String hash2;
+
     public Controlador(Vista vista, Cliente cliente1, BD bd) {
         this.vista = vista;
         this.cliente1 = cliente1;
@@ -50,6 +55,7 @@ public class Controlador {
 
         sc = new Scanner(System.in);
 
+        hashes = new ArrayList<>();
         while (true) {
             vista.mostrarMensaje("Escribe que opcion quieres elegir.");
             vista.mostrarMensaje("1. Enviar a la BD un mensaje.");
@@ -67,6 +73,7 @@ public class Controlador {
                 mensajeCifradoAES = Criptografia.encripta(MetodosEstaticos.stringToByteArray(mensaje),
                         cliente1.getSecretKey());
                 bd.setMensaje(mensajeCifradoAES);
+                hashes.add(Criptografia.generarHashMD5(mensaje));
                 vista.mostrarMensaje("Mensaje guardado");
 
                 vista.mostrarMensaje(" ");
@@ -75,6 +82,12 @@ public class Controlador {
                 vista.mostrarMensaje("Que posicion de la lista quieres recuperar. ");
                 index = sc.nextInt();
                 vista.mostrarMensaje("Mensaje de la bd ya descifrado: " + bd.desencriptarMensaje(index));
+                hash2 = Criptografia.generarHashMD5(bd.desencriptarMensaje(index));
+                if (hashes.get(index).equals(hash2)) {
+                    vista.mostrarMensaje("Los hashes son iguales.");
+                } else {
+                    vista.mostrarMensaje("Los hashes no son iguales.");
+                }
                 sc.nextLine();
 
                 vista.mostrarMensaje(" ");
